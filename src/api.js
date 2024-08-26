@@ -106,6 +106,7 @@ Module.onRuntimeInitialized = () => {
     result_error: [v, n3],
     column_table_name: [s, n2],
     get_autocommit: [n, n1],
+    sqlar_init: [n, n3],
   };
   for (const [name, sig] of Object.entries(signatures)) {
     sqlite3[name] = cwrap(`sqlite3_${name}`, sig[0], sig[1]);
@@ -242,6 +243,7 @@ class Database {
       throw new SQLite3Error(`Could not open the database "${filename}"`);
     }
     this._functions = new Map();
+    sqlite3.sqlar_init(this._ptr, 0, 0)
   }
 
   get isOpen() {

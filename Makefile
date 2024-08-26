@@ -2,11 +2,11 @@ SHELL := /bin/bash
 
 SQLITE_URL = https://www.sqlite.org/2024/sqlite-amalgamation-3460000.zip
 SQLITE_HASH = 1221eed70de626871912bfca144c00411f0c30d3c2b7935cff3963b63370ef7c
-SQLITE_SRC_FILES = sqlite-src/sqlite3.c sqlite-src/sqlite3.h
+SQLITE_SRC_FILES = sqlite-src/sqlite3.c sqlite-src/sqlite3.h sqlite-src/shell.c
 
 JS_PRE_FILES = src/api.js src/vfs-pre.js
 JS_LIB_FILES = src/vfs.js
-OBJECT_FILES = build/sqlite3.o build/vfs.o
+OBJECT_FILES = build/sqlite3.o build/shell.o build/vfs.o
 EXPORTED_FUNCS_JSON = build/exp_funcs.json
 
 SQLITE_FLAGS = \
@@ -29,7 +29,8 @@ SQLITE_FLAGS = \
 	-DSQLITE_TEMP_STORE=3 \
 	-DSQLITE_OS_OTHER=1 \
 	-DSQLITE_ENABLE_FTS5 \
-	-DSQLITE_ENABLE_DBSTAT_VTAB
+	-DSQLITE_ENABLE_DBSTAT_VTAB \
+	-DSQLITE_HAVE_ZLIB
 
 EM_FLAGS = -O3 -flto
 
@@ -44,7 +45,8 @@ LINK_FLAGS = \
 	-s ENVIRONMENT=node \
 	-s FILESYSTEM=0 \
 	-s WASM_BIGINT \
-	-s WASM_ASYNC_COMPILATION=0
+	-s WASM_ASYNC_COMPILATION=0 \
+	-s USE_ZLIB=1
 
 all: dist/node-sqlite3-wasm.js
 
@@ -60,6 +62,10 @@ dist/node-sqlite3-wasm.js: $(OBJECT_FILES) $(EXPORTED_FUNCS_JSON) $(JS_PRE_FILES
 	sed -i -E 's/^\}\)\(\);$$/})()();/' $@  # resolve factory
 
 build/sqlite3.o: $(SQLITE_SRC_FILES)
+	mkdir -p build
+	emcc $(EM_FLAGS) $(SQLITE_FLAGS) -c $< -o $@
+
+build/shell.o: sqlite-src/shell.c sqlite-src/sqlite3.h
 	mkdir -p build
 	emcc $(EM_FLAGS) $(SQLITE_FLAGS) -c $< -o $@
 
@@ -84,5 +90,5 @@ $(SQLITE_SRC_FILES):
 	mkdir -p sqlite-src
 	curl -LsSf '$(SQLITE_URL)' -o $(SQLITE_ZIP)
 	[ $(SQLITE_HASH) == $$(openssl dgst -sha3-256 $(SQLITE_ZIP) | awk '{print $$NF}') ]
-	unzip -ojDD $(SQLITE_ZIP) "*/sqlite3.c" "*/sqlite3.h" -d sqlite-src/
+	unzip -ojDD $(SQLITE_ZIP) "*/sqlite3.c" "*/sqlite3.h" "*/shell.c" -d sqlite-src/
 	rm $(SQLITE_ZIP)
