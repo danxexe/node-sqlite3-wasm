@@ -1,3 +1,6 @@
+This is a fork of the original [tndrle/node-sqlite3-wasm](https://github.com/tndrle/node-sqlite3-wasm)
+with added support for [SQLite Archive](https://sqlite.org/sqlar.html) `sqlar_compress` and `sqlar_uncompress` functions.
+
 **_node-sqlite3-wasm_**
 
 [![npm](https://img.shields.io/npm/v/node-sqlite3-wasm.svg)](https://www.npmjs.com/package/node-sqlite3-wasm)
