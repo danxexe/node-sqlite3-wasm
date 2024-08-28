@@ -1,6 +1,6 @@
 {
   "name": "@danxexe/node-sqlite3-wasm",
-  "version": "0.8.19-1",
+  "version": "0.8.19-2",
   "description": "WebAssembly port of SQLite3 for Node.js with file system access",
   "homepage": "https://github.com/danxexe/node-sqlite3-wasm",
   "author": "Tobias Enderle",
